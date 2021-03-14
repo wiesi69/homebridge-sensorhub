@@ -1,6 +1,6 @@
 import { API } from 'homebridge';
 import { SensorHubAccessory} from './SensorHubAccessory';
-import { SensorHubOffBoardSensor} from './SensorHubOffBoardSensor';
+// import { SensorHubOffBoardSensor} from './SensorHubOffBoardSensor';
 
 
 export = (api: API) => {

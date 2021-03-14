@@ -1,0 +1,29 @@
+{
+    "pluginAlias": "SensorHub",
+    "pluginType": "accessory",
+    "singular": true,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "description": "Plugin name as displayed in the homebridge log.",
+                "type": "string",
+                "required": true,
+                "default": "SensorHub"
+            },
+            "accessory": {
+                "type": "string",
+                "enum": [
+                    "SensorHub"
+                ]
+            },
+            "sensorReadInterval": {
+                "description": "Sensor read interval in seconds.  Default: 10.",
+                "type": "integer",
+                "placeholder": 10,
+                "minimum": 1,
+                "maximum": 60
+            }
+        }
+    }
+}

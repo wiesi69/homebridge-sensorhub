@@ -149,19 +149,23 @@ export class SensorHubAccessory implements AccessoryPlugin {
 
         // see https://wiki.52pi.com/index.php/DockerPi_Sensor_Hub_Development_Board_SKU:_EP-0106#DockerPi_Sensor_Hub_Development_Board_V2.0
 
-        this.log.info('ReadSensors');
 
-        this.ligthBrigthness++;
-        this.onBoardTemperature++;
-        this.onBoardHumidity++;
-        this.motionDetected = !!this.motionDetected;
-        this.bmp280Temperature++;
-        this.bmp280Pressure++;
+        if (this.ligthBrigthness < 100) {
+            this.ligthBrigthness++;
+            this.onBoardTemperature++;
+            this.onBoardHumidity++;
+            this.motionDetected = !!this.motionDetected;
+            this.bmp280Temperature++;
+            this.bmp280Pressure++;
+        } else {
+            this.ligthBrigthness = 0;
+            this.onBoardTemperature = 0;
+            this.onBoardHumidity = 0;
+            this.motionDetected = false;
+            this.bmp280Temperature = 0;
+            this.bmp280Pressure = 0;
 
-
-
-
-
+        }
 
     }
 
