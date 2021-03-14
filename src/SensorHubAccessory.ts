@@ -66,7 +66,6 @@ export class SensorHubAccessory implements AccessoryPlugin {
 
         service.getCharacteristic(this.api.hap.Characteristic.CurrentAmbientLightLevel)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                this.log.info(`Queried current light brightness:${this.ligthBrigthness} Lux`);
                 callback(undefined, this.ligthBrigthness);
             });
 
@@ -79,7 +78,6 @@ export class SensorHubAccessory implements AccessoryPlugin {
 
         service.getCharacteristic(this.api.hap.Characteristic.CurrentTemperature)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                this.log.info(`Queried onboard temperature: ${this.onBoardTemperature} C`);
                 callback(undefined, this.onBoardTemperature);
             });
 
@@ -92,7 +90,6 @@ export class SensorHubAccessory implements AccessoryPlugin {
 
         service.getCharacteristic(this.api.hap.Characteristic.CurrentRelativeHumidity)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                this.log.info(`Queried onboard humidity: ${this.onBoardHumidity}%`);
                 callback(undefined, this.onBoardHumidity);
             });
 
@@ -105,7 +102,6 @@ export class SensorHubAccessory implements AccessoryPlugin {
 
         service.getCharacteristic(this.api.hap.Characteristic.MotionDetected)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                this.log.info(`Queried motion detected: ${this.motionDetected}`);
                 callback(undefined, this.motionDetected);
             });
 
@@ -118,7 +114,6 @@ export class SensorHubAccessory implements AccessoryPlugin {
 
         service.getCharacteristic(this.api.hap.Characteristic.CurrentTemperature)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                this.log.info(`Queried BMP280 temperature: ${this.bmp280Temperature} C`);
                 callback(undefined, this.bmp280Temperature);
             });
 
@@ -126,7 +121,6 @@ export class SensorHubAccessory implements AccessoryPlugin {
         // TODO FOR Eve App:  PRESSURE WITH Community Types
         service.getCharacteristic (CommunityTypes.AtmosphericPressureLevel)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                this.log.info(`Queried BMP280 pressure: ${this.bmp280Pressure} pascal`);
                 callback(undefined, this.bmp280Pressure);
             });
         */

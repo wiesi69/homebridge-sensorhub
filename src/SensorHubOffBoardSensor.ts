@@ -27,7 +27,7 @@ export class SensorHubOffBoardSensor implements AccessoryPlugin {
     private informationService: Service;
 
 
-    private offBoardTemperature = -66.0;
+    private offBoardTemperature = 0.0;
 
 
     constructor(log: Logging, config: AccessoryConfig, api: API) {
@@ -55,7 +55,6 @@ export class SensorHubOffBoardSensor implements AccessoryPlugin {
                 maxValue: 100,
             })
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                this.log.info(`Queried offboard temperature: ${this.offBoardTemperature} C`);
                 callback(undefined, this.offBoardTemperature);
             });
 
