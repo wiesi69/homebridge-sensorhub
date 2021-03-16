@@ -1,6 +1,8 @@
+import { SensorHubAccessory } from './SensorHubAccessory';
+import { SensorHubSensorReader } from './SensorHubSensorReader';
+
 import {
     AccessoryConfig,
-    AccessoryPlugin,
     API,
     CharacteristicEventTypes,
     CharacteristicGetCallback,
@@ -10,40 +12,22 @@ import {
 
 
 
-
-
-
 /*
  * Initializer function called when the plugin is loaded.
  */
 
-export class SensorHubOffBoardSensor implements AccessoryPlugin {
-
-    private readonly log: Logging;
-    private readonly config: AccessoryConfig;
-    private readonly api: API;
+export class SensorHubOffBoardAccessory extends SensorHubAccessory {
 
     private offBoardTemperatureSensorService: Service;
     private informationService: Service;
 
-
-    private offBoardTemperature = 0.0;
-
-
-    constructor(log: Logging, config: AccessoryConfig, api: API) {
-        this.log = log;
-        this.config = config;
-        this.api = api;
-
+    constructor(logger: Logging, config: AccessoryConfig, api: API) {
+        const sensorReader = SensorHubSensorReader.getInstance();
+        super(logger, config, api, sensorReader);
         this.offBoardTemperatureSensorService = this.createOffBoardTemperatureSensorService();
-
         this.informationService = this.createInformationService();
-
-        log.info('SensorHubOffBoardAccessory finished initializing!');
+        logger.info('SensorHubOffBoardAccessory finished initializing!');
     }
-
-
-
 
     private createOffBoardTemperatureSensorService(): Service {
         const service: Service = new this.api.hap.Service.TemperatureSensor(this.config.name);
@@ -55,7 +39,7 @@ export class SensorHubOffBoardSensor implements AccessoryPlugin {
                 maxValue: 100,
             })
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                callback(undefined, this.offBoardTemperature);
+                callback(undefined, this.sensorReader.offBoardTemperature);
             });
 
         return service;
@@ -69,22 +53,6 @@ export class SensorHubOffBoardSensor implements AccessoryPlugin {
         return service;
     }
 
-
-
-    private getSensorData() {
-        // see https://wiki.52pi.com/index.php/DockerPi_Sensor_Hub_Development_Board_SKU:_EP-0106#DockerPi_Sensor_Hub_Development_Board_V2.0
-    }
-
-
-
-
-    /*
-     * This method is optional to implement. It is called when HomeKit ask to identify the accessory.
-     * Typical this only ever this.api.happens at the pairing process.
-     */
-    identify(): void {
-        this.log('Identify!');
-    }
 
     /*
      * This method is called directly after creation of this instance.

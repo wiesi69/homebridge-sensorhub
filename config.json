@@ -1,0 +1,11 @@
+{
+    "accessories": [
+        {
+            "accessory": "SensorHub",
+            "name": "SensorHub",
+            "interval": 20,
+            "ligthSensor": true,
+            "motionSensor": true
+        }
+    ]
+}

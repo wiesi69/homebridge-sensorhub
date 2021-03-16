@@ -5,24 +5,34 @@
     "schema": {
         "type": "object",
         "properties": {
-            "name": {
-                "description": "Plugin name as displayed in the homebridge log.",
-                "type": "string",
-                "required": true,
-                "default": "SensorHub"
-            },
             "accessory": {
                 "type": "string",
                 "enum": [
                     "SensorHub"
                 ]
             },
-            "sensorReadInterval": {
+            "name": {
+                "description": "Plugin name as displayed in the homebridge log.",
+                "type": "string",
+                "required": true,
+                "default": "SensorHub"
+            },
+            "interval": {
                 "description": "Sensor read interval in seconds.  Default: 10.",
                 "type": "integer",
                 "placeholder": 10,
                 "minimum": 1,
-                "maximum": 60
+                "maximum": 120
+            },
+            "ligthSensor": {
+                "description": "Enable ligth sensor.",
+                "type": "boolean",
+                "placeholder": true
+            },
+            "motionSensor": {
+                "description": "Enable motion sensor.",
+                "type": "boolean",
+                "placeholder": true
             }
         }
     }

@@ -1,9 +1,14 @@
 import { API } from 'homebridge';
-import { SensorHubAccessory} from './SensorHubAccessory';
+//import { SensorHubSensorReader } from './SensorHubSensorReader';
+
+import { SensorHubOnBoardAccessory} from './SensorHubOnBoardAccessory';
 // import { SensorHubOffBoardSensor} from './SensorHubOffBoardSensor';
 
 
+
+
 export = (api: API) => {
-    api.registerAccessory('SensorHub', SensorHubAccessory);
+
+    api.registerAccessory('SensorHub', SensorHubOnBoardAccessory);
     // api.registerAccessory('SensorHubOffBoardSensor', SensorHubOffBoardSensor);
 };
