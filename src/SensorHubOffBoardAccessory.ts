@@ -1,14 +1,12 @@
-import { SensorHubAccessory } from './SensorHubAccessory';
-import { SensorHubSensorReader } from './SensorHubSensorReader';
-
 import {
-    AccessoryConfig,
-    API,
     CharacteristicEventTypes,
     CharacteristicGetCallback,
-    Logging,
+
     Service,
 } from 'homebridge';
+import { SensorHubAccessory, SensorHubPlatform } from './SensorHubAccessory';
+
+
 
 
 
@@ -21,25 +19,26 @@ export class SensorHubOffBoardAccessory extends SensorHubAccessory {
     private offBoardTemperatureSensorService: Service;
     private informationService: Service;
 
-    constructor(logger: Logging, config: AccessoryConfig, api: API) {
-        const sensorReader = SensorHubSensorReader.getInstance();
-        super(logger, config, api, sensorReader);
+    constructor(platform: SensorHubPlatform, name: string | undefined) {
+        super(platform, name);
+
         this.offBoardTemperatureSensorService = this.createOffBoardTemperatureSensorService();
         this.informationService = this.createInformationService();
-        logger.info('SensorHubOffBoardAccessory finished initializing!');
+        this.platform.logger.info('SensorHubOffBoardAccessory finished initializing!');
     }
 
     private createOffBoardTemperatureSensorService(): Service {
-        const service: Service = new this.api.hap.Service.TemperatureSensor(this.config.name);
+        const service: Service = new this.platform.hap.Service.TemperatureSensor(`${this.platform.name}OffBoard`);
+        service.UUID = this.platform.hap.uuid.generate('OffBoardTemperatureSensor');
 
-        service.getCharacteristic (this.api.hap.Characteristic.CurrentTemperature)
+        service.getCharacteristic (this.platform.hap.Characteristic.CurrentTemperature)
             // set minValue to -100 (Apple's HomeKit Accessorry Protocol limits minValue to 0, maybe it's true for California  ...)
             .setProps({
                 minValue: -100,
                 maxValue: 100,
             })
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                callback(undefined, this.sensorReader.offBoardTemperature);
+                callback(undefined, this.sensorHub.offBoardTemperature);
             });
 
         return service;
@@ -47,9 +46,12 @@ export class SensorHubOffBoardAccessory extends SensorHubAccessory {
 
 
     private createInformationService(): Service {
-        const service = new this.api.hap.Service.AccessoryInformation(this.config.name)
-            .setCharacteristic (this.api.hap.Characteristic.Manufacturer, 'DockerPi')
-            .setCharacteristic (this.api.hap.Characteristic.Model, 'Sensor Hub');
+        const service = new this.platform.hap.Service.AccessoryInformation(`${this.platform.name}OffBoard`)
+            .setCharacteristic (this.platform.hap.Characteristic.Manufacturer, 'DockerPi')
+            .setCharacteristic (this.platform.hap.Characteristic.Model, 'Sensor Hub offboard sensor');
+        service.UUID = this.platform.hap.uuid.generate('SensorHubOffBoardAccessory');
+
+
         return service;
     }
 

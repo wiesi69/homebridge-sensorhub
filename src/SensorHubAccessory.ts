@@ -1,20 +1,22 @@
 import {
-    AccessoryConfig,
     AccessoryPlugin,
-    API,
-    Logging,
     Service,
+    Logging,
 } from 'homebridge';
+import { SensorHub } from './SensorHub';
+import { SensorHubPlatform } from './SensorHubPlatform';
 
-import { SensorHubSensorReader } from './SensorHubSensorReader';
-
+export { SensorHubPlatform };
 
 export abstract class SensorHubAccessory implements AccessoryPlugin {
 
-    constructor(protected readonly logger: Logging,
-        protected readonly config: AccessoryConfig,
-        protected readonly api: API,
-        protected readonly sensorReader: SensorHubSensorReader) { }
+    public readonly logger: Logging;
+    public readonly sensorHub: SensorHub;
+
+    constructor(public readonly platform: SensorHubPlatform, public readonly name: string | undefined) {
+        this.sensorHub = platform.sensorHub;
+        this.logger = platform.logger;
+    }
 
 
     abstract getServices(): Service[];

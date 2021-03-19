@@ -1,48 +1,61 @@
-import { SensorHubAccessory } from './SensorHubAccessory';
-import { SensorHubSensorReader } from './SensorHubSensorReader';
-
 import {
-    AccessoryConfig,
-    API,
     CharacteristicEventTypes,
     CharacteristicGetCallback,
-    Logging,
     Service,
 } from 'homebridge';
+import { SensorHubAccessory } from './SensorHubAccessory';
+import { SensorHubPlatform } from './SensorHubPlatform';
+
 
 
 export class SensorHubOnBoardAccessory extends SensorHubAccessory {
-    private lightSensorService: Service;
-    private temperatureSensorService: Service;
-    private humiditySensorService: Service;
-    private motionDetectorService: Service;
-    private informationService: Service;
+
+    public accessories:Array<Service> = new Array(0);
+
+    public lightSensorService: Service | null = null;
+    public temperatureSensorService: Service;
+    public humiditySensorService: Service;
+    public motionDetectorService: Service | null = null;
+    public informationService: Service;
 
 
-    constructor(logger: Logging, config: AccessoryConfig, api: API) {
-        const interval = config.interval || 10;
-        const sensorReader = SensorHubSensorReader.createAndStart(interval, logger);
-        super(logger, config, api, sensorReader);
+
+    constructor(platform: SensorHubPlatform, name: string | undefined) {
+
+        super(platform, name);
+
+        this.temperatureSensorService = this.addAccessory(this.createOnBoardTemperatureSensorService());
+        this.humiditySensorService = this.addAccessory(this.createOnBoardHumiditySensorService());
 
 
-        this.lightSensorService = this.createLightSensorService();
-        this.temperatureSensorService = this.createOnBoardTemperatureSensorService();
-        this.humiditySensorService = this.createOnBoardHumiditySensorService();
-        this.motionDetectorService = this.createMotionDetectorService();
-        this.informationService = this.createInformationService();
+        if (platform.config.lightSensor) {
+            this.lightSensorService = this.addAccessory(this.createLightSensorService());
+        }
 
-        logger.info('SensorHubOnBoardAccessory finished initializing!');
+        if (platform.config.motionSensor) {
+            this.motionDetectorService = this.addAccessory(this.createMotionDetectorService());
+        }
+
+
+
+        this.informationService = this.addAccessory(this.createInformationService());
+
+
+        this.logger.info('SensorHubOnBoardAccessory finished initializing!');
     }
 
 
-
+    protected addAccessory(accessory: Service): Service {
+        this.accessories.push(accessory);
+        return accessory;
+    }
 
     private createLightSensorService(): Service {
-        const service: Service = new this.api.hap.Service.LightSensor(this.config.name);
-
-        service.getCharacteristic(this.api.hap.Characteristic.CurrentAmbientLightLevel)
+        const service: Service = new this.platform.hap.Service.LightSensor(this.platform.name);
+        service.getCharacteristic(this.platform.hap.Characteristic.CurrentAmbientLightLevel)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                callback(undefined, this.sensorReader.ligthBrigthness);
+                const brightness = Math.max(this.sensorHub.onBoardBrigthness, 0.0001); // HAP spec: minimum allowed value
+                callback(undefined, brightness);
             });
 
         return service;
@@ -50,21 +63,20 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
 
     private createOnBoardTemperatureSensorService(): Service {
-        const temp1 = this.sensorReader.onBoardTemperature;
-        const temp2 = this.sensorReader.bmp280Temperature;
-        const temp = (temp1 + temp2) / 2;
+        const service: Service = new this.platform.hap.Service.TemperatureSensor(this.platform.name);
 
-        const service: Service = new this.api.hap.Service.TemperatureSensor(this.config.name);
-
-        service.getCharacteristic(this.api.hap.Characteristic.CurrentTemperature)
+        service.getCharacteristic(this.platform.hap.Characteristic.CurrentTemperature)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                callback(undefined, temp );
+                const temp1 = this.sensorHub.onBoardTemperature;
+                const temp2 = this.sensorHub.bmp280Temperature;
+                const temp = (temp1 + temp2) / 2;
+                callback(undefined, temp);
             });
 
         /*
-        service.getCharacteristic (this.api.hap.Characteristic.C   .CurrentAtm  )
+        service.getCharacteristic (this.platform.hap.Characteristic.C   .CurrentAtm  )
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                callback(undefined, this.sensorReader.bmp280Pressure);
+                callback(undefined, this.sensorHub.bmp280Pressure);
             });
 
 */
@@ -74,11 +86,11 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
 
     private createOnBoardHumiditySensorService(): Service {
-        const service: Service = new this.api.hap.Service.HumiditySensor(this.config.name);
+        const service: Service = new this.platform.hap.Service.HumiditySensor(this.platform.name);
 
-        service.getCharacteristic(this.api.hap.Characteristic.CurrentRelativeHumidity)
+        service.getCharacteristic(this.platform.hap.Characteristic.CurrentRelativeHumidity)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                callback(undefined, this.sensorReader.onBoardHumidity);
+                callback(undefined, this.sensorHub.onBoardHumidity);
             });
 
         return service;
@@ -86,11 +98,11 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
 
     private createMotionDetectorService(): Service {
-        const service: Service = new this.api.hap.Service.MotionSensor(this.config.name);
+        const service: Service = new this.platform.hap.Service.MotionSensor(this.platform.name);
 
-        service.getCharacteristic(this.api.hap.Characteristic.MotionDetected)
+        service.getCharacteristic(this.platform.hap.Characteristic.MotionDetected)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                callback(undefined, this.sensorReader.motionDetected);
+                callback(undefined, this.sensorHub.onBoardMotionDetected);
             });
 
         return service;
@@ -99,9 +111,9 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
 
     private createInformationService(): Service {
-        const service = new this.api.hap.Service.AccessoryInformation()
-            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, 'DockerPi')
-            .setCharacteristic(this.api.hap.Characteristic.Model, 'Sensor Hub');
+        const service = new this.platform.hap.Service.AccessoryInformation()
+            .setCharacteristic(this.platform.hap.Characteristic.Manufacturer, 'DockerPi')
+            .setCharacteristic(this.platform.hap.Characteristic.Model, 'Sensor Hub');
         return service;
     }
 
@@ -111,14 +123,13 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
      * It should return all services which should be added to the accessory.
      */
     getServices(): Service[] {
-        return [
-            this.lightSensorService,
-            this.temperatureSensorService,
-            this.humiditySensorService,
-            this.motionDetectorService,
-            this.informationService,
 
-        ];
+        return this.accessories;
     }
 
+
+
+
+
 }
+

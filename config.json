@@ -1,11 +1,12 @@
 {
-    "accessories": [
+    "platform": [
         {
-            "accessory": "SensorHub",
+            "platform": "SensorHub",
             "name": "SensorHub",
             "interval": 20,
             "ligthSensor": true,
-            "motionSensor": true
+            "motionSensor": true,
+            "externalTemperatureSensor": true
         }
     ]
 }

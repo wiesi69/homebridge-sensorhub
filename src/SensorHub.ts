@@ -2,51 +2,42 @@
 
 import { init } from 'raspi';
 import { I2C } from 'raspi-i2c';
-import { Logging, LogLevel } from 'homebridge';
+import {Logging, LogLevel } from 'homebridge';
+import {SensorHubPlatform} from './SensorHubPlatform';
 
 
 
 
-export class SensorHubSensorReader {
+export class SensorHub {
 
-    //SensorHub is a Singleton
-    private static instance: SensorHubSensorReader;
+    protected logger: Logging;
+    protected timeout: NodeJS.Timeout | null = null;
 
-    readonly logger: Logging;
-    readonly interval: number;
+
 
     offBoardTemperature = 0;
-    ligthBrigthness = 0;
+    onBoardBrigthness = 0;
     onBoardTemperature = 0;
     onBoardHumidity = 0;
-    motionDetected = false;
+    onBoardMotionDetected = false;
     bmp280Temperature = 0;
     bmp280Pressure = 0;
 
 
-    private constructor(sec: number, logger: Logging) {
-        if (SensorHubSensorReader.instance) {
-            throw new Error('SensorHubSensorReader instance already exists');
-        }
-        SensorHubSensorReader.instance = this;
-        this.logger = logger;
-        this.interval = sec;
+    public constructor(public readonly platform: SensorHubPlatform) {
+        this.logger = this.platform.logger;
     }
 
-    static getInstance(): SensorHubSensorReader {
-        if (!SensorHubSensorReader.instance) {
-            throw new Error('SensorHubSensorReader does not exist');
+
+
+
+    public startReading(sec: number) {
+        if (this.timeout === null) {
+            this.readSensors(); // read imidiatly
+            this.timeout = setInterval(() => this.readSensors(), sec * 1000); //millisecond needed
+        } else {
+            this.platform.logger.error('Sensor reading already started.');
         }
-
-        return SensorHubSensorReader.instance;
-    }
-
-    public static createAndStart(sec: number, logger: Logging): SensorHubSensorReader {
-        const reader = new SensorHubSensorReader(sec, logger);
-
-        setInterval(() => SensorHubSensorReader.instance.readSensors(), sec * 1000);
-
-        return reader;
     }
 
 
@@ -106,26 +97,30 @@ export class SensorHubSensorReader {
 
             if (register[STATUS_REG] & T_OVR) {
                 this.logger.error('Off-chip temperature sensor overrange!');
+                this.offBoardTemperature = 0;
             } else if (register[STATUS_REG] & T_FAIL) {
                 this.logger.log(LogLevel.INFO, 'No external temperature sensor!');
+                this.offBoardTemperature = 0;
             } else {
-                const offBoardTemperature: number = register[TEMP_REG] + TEMP_COR;
-                this.logger.debug(`Current external Sensor Temperature = ${offBoardTemperature} Celsius`);
+                this.offBoardTemperature = register[TEMP_REG] + TEMP_COR;
+                this.logger.debug(`Current external Sensor Temperature = ${this.offBoardTemperature} Celsius`);
             }
 
             if (register[STATUS_REG] & L_OVR) {
                 this.logger.error('Onboard brightness sensor overrange!');
+                this.onBoardBrigthness = 0;
             } else if (register[STATUS_REG] & L_FAIL) {
                 this.logger.error('Onboard brightness sensor failure!');
+                this.onBoardBrigthness = 0;
             } else {
-                const brightness: number = (register[LIGHT_REG_H] << 8) | (register[LIGHT_REG_L]);
-                this.logger.debug(`Current onboard sensor brightness = ${brightness} Lux`);
+                this.onBoardBrigthness = (register[LIGHT_REG_H] << 8) | (register[LIGHT_REG_L]);
+                this.logger.debug(`Current onboard sensor brightness = ${this.onBoardBrigthness} Lux`);
             }
 
-            const onBoardTemperature: number = register[ON_BOARD_TEMP_REG] + ON_BOARD_TEMP_COR;
-            const onBoardHumiditiy: number = register[ON_BOARD_HUMIDITY_REG];
-            this.logger.debug(`Current onboard sensor temperature = ${onBoardTemperature} Celsius`);
-            this.logger.debug(`Current onboard sensor humidity = ${onBoardHumiditiy} %`);
+            this.onBoardTemperature = register[ON_BOARD_TEMP_REG] + ON_BOARD_TEMP_COR;
+            this.onBoardHumidity = register[ON_BOARD_HUMIDITY_REG];
+            this.logger.debug(`Current onboard sensor temperature = ${this.onBoardTemperature} Celsius`);
+            this.logger.debug(`Current onboard sensor humidity = ${this.onBoardHumidity} %`);
 
             if (register[ON_BOARD_SENSOR_ERROR] !== 0) {
                 this.logger.log(LogLevel.INFO, 'Onboard temperature and humidity sensor data may not be up to date!');
@@ -134,14 +129,18 @@ export class SensorHubSensorReader {
 
 
             if (register[BMP280_STATUS] === 0) {
-                const bmp280Temperature: number = register[BMP280_TEMP_REG] + BMP280_TEMP_COR;
-                const bmp289Pressure: number =
+                this.bmp280Temperature = register[BMP280_TEMP_REG] + BMP280_TEMP_COR;
+                this.bmp280Pressure =
                     register[BMP280_PRESSURE_REG_L] | (register[BMP280_PRESSURE_REG_M] << 8) | (register[BMP280_PRESSURE_REG_H] << 16);
-                this.logger.debug(`Current barometer temperature = ${bmp280Temperature} Celsius`);
-                this.logger.debug(`Current barometer pressure = ${bmp289Pressure} Pascal`);
+                this.logger.debug(`Current barometer temperature = ${this.bmp280Temperature} Celsius`);
+                this.logger.debug(`Current barometer pressure = ${this.bmp280Pressure} Pascal`);
             } else {
                 this.logger.debug('Onboard BMP280 barometer works abnormally!');
+                this.bmp280Temperature = 0;
+                this.bmp280Pressure = 0;
             }
+
+            this.onBoardMotionDetected = register[MOTION_DETECT] === 1;
 
             if (register[MOTION_DETECT] === 1) {
                 this.logger.debug('Motion detected within 5 seconds!');
