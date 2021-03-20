@@ -8,9 +8,8 @@
             "name": {
                 "description": "Plugin name as displayed in the homebridge log.",
                 "type": "string",
-                "required": true,
                 "default": "SensorHub"
-            },
+              },
             "interval": {
                 "description": "Sensor read interval in seconds.  Default: 10.",
                 "type": "integer",
@@ -18,20 +17,45 @@
                 "minimum": 1,
                 "maximum": 120
             },
-            "ligthSensor": {
-                "description": "Enable ligth sensor.",
+            "disableTemperatureSensor": {
+                "description": "Disnable temperature sensor.",
                 "type": "boolean",
-                "placeholder": true
+                "placeholder": false
             },
-            "motionSensor": {
-                "description": "Enable motion sensor.",
+            "disableAirPressureSensor": {
+                "description": "Disnable temperature sensor.",
                 "type": "boolean",
-                "placeholder": true
+                "placeholder": false
             },
-            "externalTemperatureSensor": {
-                "description": "Enable external temperatur sensor.",
+            "disableLigthSensor": {
+                "description": "Disnable ligth sensor.",
                 "type": "boolean",
-                "placeholder": true
+                "placeholder": false
+            },
+            "disableMotionDetectionSensor": {
+                "description": "Disnable motion sensor.",
+                "type": "boolean",
+                "placeholder": false
+            },
+            "externalTempdisableExternalTemperatureSensoreratureSensor": {
+                "description": "Disnable external temperatur sensor.",
+                "type": "boolean",
+                "placeholder": false
+            },
+            "temperaturCorrection": {
+                "description": "Temperature value correction.  Default: -7.",
+                "type": "integer",
+                "placeholder": -7 
+            },
+            "brightnessCorrection": {
+                "description": "Brightness value correction.  Default: 0.",
+                "type": "integer",
+                "placeholder": 0 
+            },
+            "externalTemperatureCorrection": {
+                "description": "External temperature value correction.  Default: -3.",
+                "type": "integer",
+                "placeholder": -3 
             }
         }
     }

@@ -1,35 +1,28 @@
 import {
     CharacteristicEventTypes,
     CharacteristicGetCallback,
-
     Service,
 } from 'homebridge';
+
 import { SensorHubAccessory, SensorHubPlatform } from './SensorHubAccessory';
 
-
-
-
-
-/*
- * Initializer function called when the plugin is loaded.
- */
+const DEFAULT_EXTERNAL_TEMPERATURE_CORRECTION = -3;
 
 export class SensorHubOffBoardAccessory extends SensorHubAccessory {
 
-    private offBoardTemperatureSensorService: Service;
+    public readonly temperatureSensorService: Service;
 
-    constructor(platform: SensorHubPlatform, name: string | undefined) {
+    constructor(platform: SensorHubPlatform, name: string) {
         super(platform, name);
 
-        this.offBoardTemperatureSensorService = this.addService(this.createOffBoardTemperatureSensorService());
+        this.temperatureSensorService = this.addService(this.createOffBoardTemperatureSensorService());
 
-
-        this.platform.logger.info('SensorHubOffBoardAccessory finished initializing!');
+        this.platform.logger.info(`${name} finished initializing!`);
     }
 
     private createOffBoardTemperatureSensorService(): Service {
-        const service: Service = new this.platform.hap.Service.TemperatureSensor(`${this.platform.name}OffBoard`);
-        // service.UUID = this.platform.hap.uuid.generate('OffBoardTemperatureSensor');
+        const service: Service = new this.platform.hap.Service.TemperatureSensor(this.name);
+        const correction = this.platform.config.offBoardTemperatureCorrection | DEFAULT_EXTERNAL_TEMPERATURE_CORRECTION;
 
         service.getCharacteristic (this.platform.hap.Characteristic.CurrentTemperature)
             // set minValue to -100 (Apple's HomeKit Accessorry Protocol limits minValue to 0, maybe it's true for California  ...)
@@ -38,7 +31,7 @@ export class SensorHubOffBoardAccessory extends SensorHubAccessory {
                 maxValue: 100,
             })
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                callback(undefined, this.sensorHub.offBoardTemperature);
+                callback(undefined, this.sensorHub.offBoardTemperature + correction);
             });
 
         return service;

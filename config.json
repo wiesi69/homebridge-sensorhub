@@ -4,9 +4,14 @@
             "platform": "SensorHub",
             "name": "SensorHub",
             "interval": 20,
-            "ligthSensor": true,
-            "motionSensor": true,
-            "externalTemperatureSensor": true
+            "disableTemperatureSensor": false,
+            "disableAirPressureSensor": false,
+            "disableLigthSensor": false,
+            "disableMotionDetectionSensor": false,
+            "disableExternalTemperatureSensor": false,
+            "temperaturCorrection": -7,
+            "brightnessCorrection": 0,
+            "externalTemperatureCorrection": -3
         }
     ]
 }

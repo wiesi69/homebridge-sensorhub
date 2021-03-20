@@ -7,39 +7,51 @@ import { SensorHubAccessory } from './SensorHubAccessory';
 import { SensorHubPlatform } from './SensorHubPlatform';
 
 
-
 export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
-
-
-    public lightSensorService: Service | null = null;
     public temperatureSensorService: Service;
     public humiditySensorService: Service;
-    public motionDetectorService: Service | null = null;
-
-
+    public lightSensorService: Service;
+    public motionDetectorService: Service;
 
     constructor(platform: SensorHubPlatform, name: string | undefined) {
 
         super(platform, name);
 
-        this.temperatureSensorService = this.addService(this.createOnBoardTemperatureSensorService());
-
-
-        this.humiditySensorService = this.addService(this.createOnBoardHumiditySensorService());
-
-
-        if (platform.config.lightSensor) {
-            this.lightSensorService = this.addService(this.createLightSensorService());
-        }
-
-        if (platform.config.motionSensor) {
-            this.motionDetectorService = this.addService(this.createMotionDetectorService());
+        // OnBoard Temperature Sensor Service
+        this.temperatureSensorService = this.createOnBoardTemperatureSensorService();
+        if (!this.platform.config.disableTemperatureSensorAcessory) {
+            this.addService(this.temperatureSensorService);
+        } else {
+            this.logger.info('Onboard temperature service disabled.');
         }
 
 
+        // OnBoard Humidity Sensor Service
+        this.humiditySensorService = this.createOnBoardHumiditySensorService();
+        if (!this.platform.config.disableHumiditySensorAcessory) {
+            this.addService(this.humiditySensorService);
+        } else {
+            this.logger.info('Humidity service disabled.');
+        }
 
-        this.logger.info('SensorHubOnBoardAccessory finished initializing!');
+        // OnBoard Light Sensor Service
+        this.lightSensorService = this.createLightSensorService();
+        if (!this.platform.config.disableLightSensor) {
+            this.addService(this.lightSensorService);
+        } else {
+            this.logger.info('Light brightness service disabled.');
+        }
+
+        // OnBoard Motion Sensor Service
+        this.motionDetectorService = this.createMotionDetectorService();
+        if (!this.platform.config.motionSensor) {
+            this.addService(this.motionDetectorService);
+        } else {
+            this.logger.info('Motion detection service disabled.');
+        }
+
+        this.logger.info(`${this.name} finished initializing!`);
     }
 
 
