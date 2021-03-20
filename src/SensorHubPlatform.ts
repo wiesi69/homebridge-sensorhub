@@ -51,7 +51,7 @@ export class SensorHubPlatform implements StaticPlatformPlugin {
 
         accessories.push(new SensorHubOnBoardAccessory(this, this.name));
 
-        if (!this.config.disableExternalTemperatureSensor) {
+        if (!this.config.disableExternalTemperatureService) {
             accessories.push(new SensorHubOffBoardAccessory(this, this.name + EXTERNAL_ACCESSORY_POSTFIX));
         } else {
             this.logger.info('External Temperature Sensor disabled.');

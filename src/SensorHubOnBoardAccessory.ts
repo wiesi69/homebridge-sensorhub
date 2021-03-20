@@ -12,7 +12,7 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
     public temperatureSensorService: Service;
     public humiditySensorService: Service;
     public lightSensorService: Service;
-    public motionDetectorService: Service;
+    public motionDetectionService: Service;
 
     constructor(platform: SensorHubPlatform, name: string | undefined) {
 
@@ -20,7 +20,7 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
         // OnBoard Temperature Sensor Service
         this.temperatureSensorService = this.createOnBoardTemperatureSensorService();
-        if (!this.platform.config.disableTemperatureSensorAcessory) {
+        if (!this.platform.config.disableTemperatureService) {
             this.addService(this.temperatureSensorService);
         } else {
             this.logger.info('Onboard temperature service disabled.');
@@ -29,7 +29,7 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
         // OnBoard Humidity Sensor Service
         this.humiditySensorService = this.createOnBoardHumiditySensorService();
-        if (!this.platform.config.disableHumiditySensorAcessory) {
+        if (!this.platform.config.disableHumidityService) {
             this.addService(this.humiditySensorService);
         } else {
             this.logger.info('Humidity service disabled.');
@@ -37,16 +37,16 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
         // OnBoard Light Sensor Service
         this.lightSensorService = this.createLightSensorService();
-        if (!this.platform.config.disableLightSensor) {
+        if (!this.platform.config.disableLigthBrightnessService) {
             this.addService(this.lightSensorService);
         } else {
             this.logger.info('Light brightness service disabled.');
         }
 
         // OnBoard Motion Sensor Service
-        this.motionDetectorService = this.createMotionDetectorService();
-        if (!this.platform.config.motionSensor) {
-            this.addService(this.motionDetectorService);
+        this.motionDetectionService = this.createMotionDetectionService();
+        if (!this.platform.config.disableMotionDetectionService) {
+            this.addService(this.motionDetectionService);
         } else {
             this.logger.info('Motion detection service disabled.');
         }
@@ -58,10 +58,11 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
 
     private createLightSensorService(): Service {
+        const correction = this.platform.config.brightnessCorrection || 0;
         const service: Service = new this.platform.hap.Service.LightSensor(this.platform.name);
         service.getCharacteristic(this.platform.hap.Characteristic.CurrentAmbientLightLevel)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                const brightness = Math.max(this.sensorHub.onBoardBrigthness, 0.0001); // HAP spec: minimum allowed value
+                const brightness = Math.max(this.sensorHub.onBoardBrigthness + correction, 0.0001); // HAP spec: minimum allowed value
                 callback(undefined, brightness);
             });
 
@@ -70,6 +71,8 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
 
     private createOnBoardTemperatureSensorService(): Service {
+        const tempCorrection = this.platform.config.temperatureCorrection || 0;
+        // const airPressureCorrection = this.platform.config.airPressureCorrection || 0;
         const service: Service = new this.platform.hap.Service.TemperatureSensor(this.platform.name);
 
         service.getCharacteristic(this.platform.hap.Characteristic.CurrentTemperature)
@@ -77,7 +80,7 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
                 const temp1 = this.sensorHub.onBoardTemperature;
                 const temp2 = this.sensorHub.bmp280Temperature;
                 const temp = (temp1 + temp2) / 2;
-                callback(undefined, temp);
+                callback(undefined, temp + tempCorrection);
             });
 
         /*
@@ -104,7 +107,7 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
     }
 
 
-    private createMotionDetectorService(): Service {
+    private createMotionDetectionService(): Service {
         const service: Service = new this.platform.hap.Service.MotionSensor(this.platform.name);
 
         service.getCharacteristic(this.platform.hap.Characteristic.MotionDetected)

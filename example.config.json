@@ -1,17 +1,25 @@
 {
+    "bridge": {
+        "name": "Homebridge",
+        "username": "XXXX",
+        "port": 1234
+    },
     "platform": [
         {
             "platform": "SensorHub",
             "name": "SensorHub",
             "interval": 20,
-            "disableTemperatureSensor": false,
-            "disableAirPressureSensor": false,
-            "disableLigthSensor": false,
-            "disableMotionDetectionSensor": false,
-            "disableExternalTemperatureSensor": false,
-            "temperaturCorrection": -7,
+            "disableTemperatureService": false,
+            "disableAirPressureService": false,
+            "disableHumidityService": false,
+            "disableLigthBrightnessService": false,
+            "disableMotionDetectionService": false,
+            "disableExternalTemperatureService": false,
+            "temperatureCorrection": -7,
+            "airPressureCorrection": 0,
+            "humidityCorrection": 0,
             "brightnessCorrection": 0,
-            "externalTemperatureCorrection": -3
+            "offBoardTemperatureCorrection": -3
         }
     ]
 }

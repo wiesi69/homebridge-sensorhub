@@ -13,49 +13,59 @@
             "interval": {
                 "description": "Sensor read interval in seconds.  Default: 10.",
                 "type": "integer",
-                "placeholder": 10,
+                "default": 10,
                 "minimum": 1,
                 "maximum": 120
             },
-            "disableTemperatureSensor": {
-                "description": "Disnable temperature sensor.",
+            "disableTemperatureService": {
+                "description": "Disnable temperature service.",
                 "type": "boolean",
-                "placeholder": false
+                "default": false
             },
-            "disableAirPressureSensor": {
-                "description": "Disnable temperature sensor.",
+            "disableHumidityService": {
+                "description": "Disnable humidity service.",
                 "type": "boolean",
-                "placeholder": false
+                "default": false
             },
-            "disableLigthSensor": {
-                "description": "Disnable ligth sensor.",
+            "disableAirPressureService": {
+                "description": "Disnable temperature service.",
                 "type": "boolean",
-                "placeholder": false
+                "default": false
             },
-            "disableMotionDetectionSensor": {
-                "description": "Disnable motion sensor.",
+            "disableLigthBrightnessService": {
+                "description": "Disnable ligth service.",
                 "type": "boolean",
-                "placeholder": false
+                "default": false
             },
-            "externalTempdisableExternalTemperatureSensoreratureSensor": {
-                "description": "Disnable external temperatur sensor.",
+            "disableMotionDetectionService": {
+                "description": "Disnable motion service.",
                 "type": "boolean",
-                "placeholder": false
+                "default": false
             },
-            "temperaturCorrection": {
-                "description": "Temperature value correction.  Default: -7.",
+            "disableExternalTemperatureService": {
+                "description": "Disnable external temperatur service.",
+                "type": "boolean",
+                "default": false
+            },
+            "temperatureCorrection": {
+                "description": "Temperature value correction.",
                 "type": "integer",
-                "placeholder": -7 
+                "default": 0
+            },
+            "airPressureCorrection": {
+                "description": "Air pressure value correction.",
+                "type": "integer",
+                "default": 0 
             },
             "brightnessCorrection": {
-                "description": "Brightness value correction.  Default: 0.",
+                "description": "Brightness value correction.",
                 "type": "integer",
-                "placeholder": 0 
+                "default": 0 
             },
-            "externalTemperatureCorrection": {
-                "description": "External temperature value correction.  Default: -3.",
+            "offBoardTemperatureCorrection": {
+                "description": "OffBoard temperature value correction.",
                 "type": "integer",
-                "placeholder": -3 
+                "default": 0
             }
         }
     }
