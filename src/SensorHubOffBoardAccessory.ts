@@ -6,8 +6,6 @@ import {
 
 import { SensorHubAccessory, SensorHubPlatform } from './SensorHubAccessory';
 
-const DEFAULT_EXTERNAL_TEMPERATURE_CORRECTION = -3;
-
 export class SensorHubOffBoardAccessory extends SensorHubAccessory {
 
     public readonly temperatureSensorService: Service;
@@ -22,7 +20,7 @@ export class SensorHubOffBoardAccessory extends SensorHubAccessory {
 
     private createOffBoardTemperatureSensorService(): Service {
         const service: Service = new this.platform.hap.Service.TemperatureSensor(this.name);
-        const correction = this.platform.config.offBoardTemperatureCorrection | DEFAULT_EXTERNAL_TEMPERATURE_CORRECTION;
+        const correction = this.platform.config.offBoardTemperatureCorrection || 0;
 
         service.getCharacteristic (this.platform.hap.Characteristic.CurrentTemperature)
             // set minValue to -100 (Apple's HomeKit Accessorry Protocol limits minValue to 0, maybe it's true for California  ...)

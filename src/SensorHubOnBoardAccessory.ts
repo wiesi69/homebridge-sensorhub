@@ -96,11 +96,12 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
 
     private createOnBoardHumiditySensorService(): Service {
+        const correction = this.platform.config.humidityCorrection || 0;
         const service: Service = new this.platform.hap.Service.HumiditySensor(this.platform.name);
 
         service.getCharacteristic(this.platform.hap.Characteristic.CurrentRelativeHumidity)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                callback(undefined, this.sensorHub.onBoardHumidity);
+                callback(undefined, this.sensorHub.onBoardHumidity + correction);
             });
 
         return service;
