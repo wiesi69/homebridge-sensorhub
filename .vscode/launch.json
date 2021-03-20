@@ -5,17 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
-            "request": "launch",
-            "name": "Launch Program",
+            "address": "192.168.1.223",
+            "localRoot": "${workspaceFolder}",
+            "name": "Attach to Remote",
+            "port": 9229,
+            "remoteRoot": "/usr/bin/",
+            "request": "attach",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/dist/main.js",
-            "preLaunchTask": "tsc: build - tsconfig.json",
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ]
+            "type": "pwa-node"
+        },
+
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Homebridge",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "node /usr/lib/node_modules/homebridge/bin/homebridge -D -I"
         }
     ]
 }

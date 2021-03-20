@@ -1,16 +1,10 @@
 {
     "pluginAlias": "SensorHub",
-    "pluginType": "accessory",
+    "pluginType": "platform",
     "singular": true,
     "schema": {
         "type": "object",
         "properties": {
-            "platform": {
-                "type": "string",
-                "enum": [
-                    "SensorHub"
-                ]
-            },
             "name": {
                 "description": "Plugin name as displayed in the homebridge log.",
                 "type": "string",
@@ -31,6 +25,11 @@
             },
             "motionSensor": {
                 "description": "Enable motion sensor.",
+                "type": "boolean",
+                "placeholder": true
+            },
+            "externalTemperatureSensor": {
+                "description": "Enable external temperatur sensor.",
                 "type": "boolean",
                 "placeholder": true
             }

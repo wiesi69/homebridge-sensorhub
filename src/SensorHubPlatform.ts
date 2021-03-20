@@ -26,9 +26,12 @@ export class SensorHubPlatform implements StaticPlatformPlugin {
     }
 
 
-    startReading(){
+    startReading() {
         this.sensorHub.startReading(this.config.interval || 10);
     }
+
+
+
 
 
 
@@ -39,13 +42,12 @@ export class SensorHubPlatform implements StaticPlatformPlugin {
      * The set of exposed accessories CANNOT change over the lifetime of the plugin!
      */
     accessories(callback: (foundAccessories: AccessoryPlugin[]) => void): void {
-        let accessories: AccessoryPlugin[];
+        const accessories: Array<AccessoryPlugin> = new Array<AccessoryPlugin>();
 
-        if(this.config.externalTemperatureSensor) {
-            accessories = [new SensorHubOnBoardAccessory(this, this.config.name),
-                new SensorHubOffBoardAccessory(this, `${this.config.name}OffBoard`)];
-        } else {
-            accessories = [new SensorHubOnBoardAccessory(this, this.config.name)];
+        accessories.push(new SensorHubOnBoardAccessory(this, `${this.config.name}OnBoardAccessory`));
+
+        if (this.config.externalTemperatureSensor) {
+            accessories.push(new SensorHubOffBoardAccessory(this, `${this.config.name}OffBoardAccessory`));
         }
 
         callback(accessories);

@@ -10,13 +10,12 @@ import { SensorHubPlatform } from './SensorHubPlatform';
 
 export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
-    public accessories:Array<Service> = new Array(0);
+
 
     public lightSensorService: Service | null = null;
     public temperatureSensorService: Service;
     public humiditySensorService: Service;
     public motionDetectorService: Service | null = null;
-    public informationService: Service;
 
 
 
@@ -24,31 +23,27 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
         super(platform, name);
 
-        this.temperatureSensorService = this.addAccessory(this.createOnBoardTemperatureSensorService());
-        this.humiditySensorService = this.addAccessory(this.createOnBoardHumiditySensorService());
+        this.temperatureSensorService = this.addService(this.createOnBoardTemperatureSensorService());
+
+
+        this.humiditySensorService = this.addService(this.createOnBoardHumiditySensorService());
 
 
         if (platform.config.lightSensor) {
-            this.lightSensorService = this.addAccessory(this.createLightSensorService());
+            this.lightSensorService = this.addService(this.createLightSensorService());
         }
 
         if (platform.config.motionSensor) {
-            this.motionDetectorService = this.addAccessory(this.createMotionDetectorService());
+            this.motionDetectorService = this.addService(this.createMotionDetectorService());
         }
 
-
-
-        this.informationService = this.addAccessory(this.createInformationService());
 
 
         this.logger.info('SensorHubOnBoardAccessory finished initializing!');
     }
 
 
-    protected addAccessory(accessory: Service): Service {
-        this.accessories.push(accessory);
-        return accessory;
-    }
+
 
     private createLightSensorService(): Service {
         const service: Service = new this.platform.hap.Service.LightSensor(this.platform.name);
@@ -108,28 +103,4 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
         return service;
     }
 
-
-
-    private createInformationService(): Service {
-        const service = new this.platform.hap.Service.AccessoryInformation()
-            .setCharacteristic(this.platform.hap.Characteristic.Manufacturer, 'DockerPi')
-            .setCharacteristic(this.platform.hap.Characteristic.Model, 'Sensor Hub');
-        return service;
-    }
-
-
-    /*
-     * This method is called directly after creation of this instance.
-     * It should return all services which should be added to the accessory.
-     */
-    getServices(): Service[] {
-
-        return this.accessories;
-    }
-
-
-
-
-
 }
-
