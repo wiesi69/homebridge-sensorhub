@@ -84,7 +84,6 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
             });
 
 
-         
         /* There is no CurrentAirPressure in HAP
         service.getCharacteristic (this.platform.hap.Characteristic.CurrentAirPressure)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {

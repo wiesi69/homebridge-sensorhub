@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img src="RaspberryJar.png" height="400px">  
+  <img src="RaspiJar.png" height="500px">  
 </p>
 
 <span align="center">
