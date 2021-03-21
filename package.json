@@ -1,6 +1,6 @@
 {
     "name": "homebridge-sensorhub",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "Homebridge accessory plugin for a SensorHub equipped Raspberry Pi",
     "main": "dist/main.js",
     "scripts": {
