@@ -1,5 +1,5 @@
-src
+src/
 .*
-*.map
+dist/*.map
 RaspiJar.png
 tsconfig.json
