@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img src="RaspberryJar.png" height="200px">  
+  <img src="RaspberryJar.png" height="400px">  
 </p>
 
 <span align="center">
@@ -12,17 +12,17 @@ Homebridge Plugin for a SensorHub equipped Raspberry Pi.
 
 This is just a hobby project. My programming skills are a little bit rusty, so with this project I just want to learn a little bit about TypeScript and node.js and how to use git/github.
 
-BUT it works, so feel free to use it or to improve it.
+Having sad that, the code works and can be used and maybe will improve over time.
 
-## Installgion
+## Installation
 To install Homebridge SensorHub:
 - Follow the instructions on the [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) to install Node.js and Homebridge
-- Install the Homebridge Sensorhub with [Homebridge Config UI X](https://www.npmjs.com/package/homebridge-config-ui-x) or install manually by:
+- Install the Homebridge Sensorhub with [Homebridge Config UI X](https://www.npmjs.com/package/homebridge-config-ui-x) or install manually:
   ```
   $ sudo npm -g i homebridge-sensorhub
   ```
 
-- Edit `config.json` and add the `SensorHub` platform. Minimum configuration looks like this:
+- Add `SensorHub` as platform to your `config.json` like this:
 
     ```
     {
@@ -67,7 +67,7 @@ Here is the list of all configuration options with there default values:
             }
         ]
     }
-    ```
+```
 
 ## Known Issues
 **AirPressure** - Seems like HomeKit does not support air pressure sensors. I found some solutions for Eve products with Custom-Characteristics, but I have to invest in this further.
