@@ -1,14 +1,14 @@
 {
     "bridge": {
         "name": "Homebridge",
-        "username": "XXXX",
+        "username": "xx-xx-xx-xx-xx",
         "port": 1234
     },
     "platform": [
         {
             "platform": "SensorHub",
             "name": "SensorHub",
-            "interval": 20,
+            "interval": 10,
             "disableTemperatureService": false,
             "disableAirPressureService": false,
             "disableHumidityService": false,

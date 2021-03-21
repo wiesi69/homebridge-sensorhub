@@ -83,13 +83,15 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
                 callback(undefined, temp + tempCorrection);
             });
 
-        /*
-        service.getCharacteristic (this.platform.hap.Characteristic.C   .CurrentAtm  )
+
+         
+        /* There is no CurrentAirPressure in HAP
+        service.getCharacteristic (this.platform.hap.Characteristic.CurrentAirPressure)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
                 callback(undefined, this.sensorHub.bmp280Pressure);
             });
 
-*/
+        */
 
         return service;
     }
