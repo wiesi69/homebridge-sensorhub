@@ -10,13 +10,13 @@ Homebridge Plugin for a SensorHub equipped Raspberry Pi.
 <hr>
 </span>
 
-This is just a hobby project. My programming skills are a little bit rusty, so with this project I just want to learn a little bit about TypeScript and node.js and how to use git/github.
+This is just a hobby project to learn TypeScript, node.js and git/github.
+My programming skills are a little bit rusty, but I got it working.
 
-Having sad that, the code works and can be used and maybe will improve over time.
+Feel free to use the homebridge-sensorhub plugin as it is or the code as starting point for your own playground.
 
 ## Installation
 To install Homebridge SensorHub:
-- Follow the instructions on the [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) to install Node.js and Homebridge
 - Install the Homebridge Sensorhub with [Homebridge Config UI X](https://www.npmjs.com/package/homebridge-config-ui-x) or install manually:
   ```
   $ sudo npm -g i homebridge-sensorhub
