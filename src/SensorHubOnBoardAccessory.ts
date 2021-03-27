@@ -150,7 +150,7 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
     brightnessChanged(sensorBrightness: number) {
         const brigthness = this.calculateBrightness(sensorBrightness);
-        this.lightSensorService.updateCharacteristic(this.platform.Characteristic.Brightness, brigthness);
+        this.lightSensorService.updateCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel, brigthness);
         this.logger.debug(`Notify HomeKit: Brightness changed to ${brigthness} lux`);
     }
 
