@@ -14,21 +14,33 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
     public lightSensorService: Service;
     public motionDetectionService: Service;
 
-    constructor(platform: SensorHubPlatform, name: string | undefined) {
+    private temperatureCorrection: number;
+    private humidityCorrection: number;
+    private brightnessCorrection: number;
+    private airPressureCorrection: number;
+
+
+
+    constructor(platform: SensorHubPlatform, name: string) {
 
         super(platform, name);
 
+        this.temperatureCorrection = this.platform.config.temperatureCorrection || 0;
+        this.humidityCorrection = this.platform.config.humidityCorrection || 0;
+        this.brightnessCorrection = this.platform.config.brightnessCorrection || 0;
+        this.airPressureCorrection = this.platform.config.airPressureCorrection || 0;
+
         // OnBoard Temperature Sensor Service
-        this.temperatureSensorService = this.createOnBoardTemperatureSensorService();
+        this.temperatureSensorService = this.createTemperatureSensorService();
         if (!this.platform.config.disableTemperatureService) {
             this.addService(this.temperatureSensorService);
         } else {
-            this.logger.info('Onboard temperature service disabled.');
+            this.logger.info('Temperature service disabled.');
         }
 
 
         // OnBoard Humidity Sensor Service
-        this.humiditySensorService = this.createOnBoardHumiditySensorService();
+        this.humiditySensorService = this.createHumiditySensorService();
         if (!this.platform.config.disableHumidityService) {
             this.addService(this.humiditySensorService);
         } else {
@@ -58,29 +70,27 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
 
     private createLightSensorService(): Service {
-        const correction = this.platform.config.brightnessCorrection || 0;
+
         const service: Service = new this.platform.hap.Service.LightSensor(this.platform.name);
         service.getCharacteristic(this.platform.hap.Characteristic.CurrentAmbientLightLevel)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                const brightness = Math.max(this.sensorHub.onBoardBrigthness + correction, 0.0001); // HAP spec: minimum allowed value
-                callback(undefined, brightness);
+                callback(undefined, this.calculateBrightness(this.sensorHub.brightness));
             });
 
         return service;
     }
 
 
-    private createOnBoardTemperatureSensorService(): Service {
-        const tempCorrection = this.platform.config.temperatureCorrection || 0;
-        // const airPressureCorrection = this.platform.config.airPressureCorrection || 0;
+    calculateBrightness(brigthness: number): number {
+        return Math.max(brigthness + this.brightnessCorrection, 0.0001); // HAP spec: minimum allowed value
+    }
+
+    private createTemperatureSensorService(): Service {
         const service: Service = new this.platform.hap.Service.TemperatureSensor(this.platform.name);
 
         service.getCharacteristic(this.platform.hap.Characteristic.CurrentTemperature)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                const temp1 = this.sensorHub.onBoardTemperature;
-                const temp2 = this.sensorHub.bmp280Temperature;
-                const temp = (temp1 + temp2) / 2;
-                callback(undefined, temp + tempCorrection);
+                callback(undefined, this.calculateTemperature(this.sensorHub.onBoardTemperatur, this.sensorHub.bmp280Temperature));
             });
 
 
@@ -95,17 +105,31 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
         return service;
     }
 
+    private calculateTemperature(onBoardTemperatur: number, bmp280Temperature: number): number {
+        return ((onBoardTemperatur + bmp280Temperature) / 2) - this.temperatureCorrection;
+    }
 
-    private createOnBoardHumiditySensorService(): Service {
-        const correction = this.platform.config.humidityCorrection || 0;
+    private calculateAirPressure(sensorPressure: number): number {
+        return (sensorPressure - this.airPressureCorrection);
+    }
+
+
+
+
+    private createHumiditySensorService(): Service {
+
         const service: Service = new this.platform.hap.Service.HumiditySensor(this.platform.name);
 
         service.getCharacteristic(this.platform.hap.Characteristic.CurrentRelativeHumidity)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                callback(undefined, this.sensorHub.onBoardHumidity + correction);
+                callback(undefined, this.calculateHumidity(this.sensorHub.humidity));
             });
 
         return service;
+    }
+
+    private calculateHumidity(sensorHumidity: number): number {
+        return sensorHumidity - this.humidityCorrection;
     }
 
 
@@ -114,10 +138,46 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
 
         service.getCharacteristic(this.platform.hap.Characteristic.MotionDetected)
             .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
-                callback(undefined, this.sensorHub.onBoardMotionDetected);
+                callback(undefined, this.sensorHub.motionDetected);
             });
 
         return service;
+    }
+
+    brightnessChanged(sensorBrightness: number) {
+        const brigthness = this.calculateBrightness(sensorBrightness);
+        this.lightSensorService.updateCharacteristic(this.platform.Characteristic.Brightness, brigthness);
+        this.logger.debug(`Notify HomeKit: Brightness changed to ${brigthness} lux`);
+    }
+
+    motionDetectionChanged(motionDetected: boolean) {
+        this.motionDetectionService.updateCharacteristic(this.platform.Characteristic.MotionDetected, motionDetected);
+        this.logger.debug(`Notify HomeKit: Motion detected: ${motionDetected}`);
+    }
+
+    bmp280TemperatureChanged(bmpSensorTemperature: number) {
+        const calcTemperature = this.calculateTemperature(this.sensorHub.onBoardTemperatur, bmpSensorTemperature);
+        this.temperatureSensorService.updateCharacteristic(this.platform.Characteristic.CurrentTemperature, calcTemperature);
+        this.logger.debug(`Notify HomeKit: Temperature changed to ${calcTemperature} C`);
+    }
+
+    bmp280PressureChanged(sensorPressure: number) {
+        const pressure = this.calculateAirPressure(sensorPressure);
+        // this.temperatureSensorService.updateCharacteristic(this.platform.Characteristic.CurrentPressure, pressure);
+        this.logger.debug(`Notify HomeKit: Air pressure changed to ${pressure} pascal`);
+    }
+
+
+    onBoardTemperatureChanged(sensorTemperature: number) {
+        const calcTemperature = this.calculateTemperature(sensorTemperature, this.sensorHub.bmp280Temperature);
+        this.temperatureSensorService.updateCharacteristic(this.platform.Characteristic.CurrentTemperature, calcTemperature);
+        this.logger.debug(`Notify HomeKit: Temperature changed to ${calcTemperature} C`);
+    }
+
+    humidityChanged(sensorHumidity: number) {
+        const humidity = this.calculateHumidity(sensorHumidity);
+        this.humiditySensorService.updateCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, humidity);
+        this.logger.debug(`Notify HomeKit:Humidity changed to ${humidity} %`);
     }
 
 }
