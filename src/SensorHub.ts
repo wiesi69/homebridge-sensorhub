@@ -186,7 +186,8 @@ export class SensorHub {
             this.logger.error('OnBoard Brightness Sensor: Overrange!');
             this.values.brightness = 0;
         } else if (register[STATUS_REG] & L_FAIL) {
-            this.logger.error('OnBoard Brightness Sensor: Failure!');
+            // This is not an error, it's just too dark for the sensor
+            this.logger.debug('OnBoard Brightness Sensor: Failure!');
             this.values.brightness = 0;
         } else {
             const oldValue = this.brightness;
