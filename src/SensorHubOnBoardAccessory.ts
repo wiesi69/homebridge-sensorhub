@@ -81,9 +81,7 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
     }
 
 
-    calculateBrightness(brigthness: number): number {
-        return Math.max(brigthness + this.brightnessCorrection, 0.0001); // HAP spec: minimum allowed value
-    }
+
 
     private createTemperatureSensorService(): Service {
         const service: Service = new this.platform.hap.Service.TemperatureSensor(this.platform.name);
@@ -105,13 +103,6 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
         return service;
     }
 
-    private calculateTemperature(onBoardTemperatur: number, bmp280Temperature: number): number {
-        return ((onBoardTemperatur + bmp280Temperature) / 2) - this.temperatureCorrection;
-    }
-
-    private calculateAirPressure(sensorPressure: number): number {
-        return (sensorPressure - this.airPressureCorrection);
-    }
 
 
 
@@ -128,10 +119,23 @@ export class SensorHubOnBoardAccessory extends SensorHubAccessory {
         return service;
     }
 
-    private calculateHumidity(sensorHumidity: number): number {
-        return sensorHumidity - this.humidityCorrection;
+
+
+    private calculateBrightness(brigthness: number): number {
+        return Math.max(brigthness + this.brightnessCorrection, 0.0001); // HAP spec: minimum allowed value
     }
 
+    private calculateTemperature(onBoardTemperatur: number, bmp280Temperature: number): number {
+        return ((onBoardTemperatur + bmp280Temperature) / 2) + this.temperatureCorrection;
+    }
+
+    private calculateAirPressure(sensorPressure: number): number {
+        return (sensorPressure + this.airPressureCorrection);
+    }
+
+    private calculateHumidity(sensorHumidity: number): number {
+        return sensorHumidity + this.humidityCorrection;
+    }
 
     private createMotionDetectionService(): Service {
         const service: Service = new this.platform.hap.Service.MotionSensor(this.platform.name);
