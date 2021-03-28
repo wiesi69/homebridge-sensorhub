@@ -18,14 +18,11 @@ const TEMP_REG = 0x01;
 const LIGHT_REG_L = 0x02;
 const LIGHT_REG_H = 0x03;
 
-
 const STATUS_REG = 0x04;
 
 const ON_BOARD_TEMP_REG = 0x05;
 const ON_BOARD_HUMIDITY_REG = 0x06;
 const ON_BOARD_SENSOR_ERROR = 0x07;
-
-const MOTION_DETECT = 0x0D;
 
 // SensorHub BMP280 sensors
 const BMP280_TEMP_REG = 0x08;
@@ -33,6 +30,9 @@ const BMP280_PRESSURE_REG_L = 0x09;
 const BMP280_PRESSURE_REG_M = 0x0A;
 const BMP280_PRESSURE_REG_H = 0x0B;
 const BMP280_STATUS = 0x0C;
+const MOTION_DETECT = 0x0D;
+
+const REGISTER_LENGTH = 0x0D;
 
 // SensorHub STATUS_REG register
 const T_OVR = 0x01; // external temperature sensor overrange
@@ -40,7 +40,8 @@ const T_FAIL = 0x02; // external temperture sensor not found
 const L_OVR = 0x03; // Brightness sensor overrange
 const L_FAIL = 0x04; // Brightness sensor failure
 
-const SENSOR_READS = 5;
+
+const DATA_BUFFER_SIZE = 6;
 
 
 type SensorHubData = {
@@ -56,6 +57,8 @@ type SensorHubData = {
 export class SensorHub {
     private logger: Logging;
     private timeout: NodeJS.Timeout | null = null;
+
+    private dataBuffer: Array<SensorHubData> = new Array<SensorHubData>();
 
     private values: SensorHubData = {
         externalTemperature: 0,
@@ -121,26 +124,29 @@ export class SensorHub {
 
 
     private readSensorData() {
-        const i2c = new I2C();
-        this.readRegister(i2c);
-    }
-
-    private readRegister(i2c: I2C) {
-        const register: Array<number> = new Array<number>(MOTION_DETECT);
-
-
-        // read all registers
-        for (let i = TEMP_REG; i <= MOTION_DETECT; i++) {
-            const data: number = i2c.readByteSync(DEVICE_ADDR, i);
-            register[i] = data;
-        }
-
+        const register = this.readRegister();
 
         this.readOnBoardSensors(register);
         this.readLigthBrightnessSensor(register);
         this.readMotionSensor(register);
         this.readBmp280Sensor(register);
         this.readExternalTemperatureSensor(register);
+    }
+
+
+
+
+
+    private readRegister(): Array<number> {
+        const register: Array<number> = new Array<number>(REGISTER_LENGTH);
+        const i2c = new I2C();
+
+        for (let i = TEMP_REG; i <= REGISTER_LENGTH; i++) {
+            const data: number = i2c.readByteSync(DEVICE_ADDR, i);
+            register[i] = data;
+        }
+
+        return register;
     }
 
 
@@ -251,16 +257,16 @@ export class SensorHub {
 
     private readMotionSensor(register: Array<number>) {
         const oldValue = this.motionDetected;
-        const newValue = register[MOTION_DETECT] === 1;
+        const newValue = register[MOTION_DETECT] > 0;
 
 
         if (oldValue !== newValue) {
             this.values.motionDetected = newValue;
             this.platform.onBoardAccessory.motionDetectionChanged(newValue);
             if (newValue) {
-                this.logger.debug('Motion Detection Sensor: Motion detected within 5 seconds!');
+                this.logger.debug(`Motion Detection Sensor: (${register[MOTION_DETECT]}) Motion detected within 5 seconds!`);
             } else {
-                this.logger.debug('Motion Detection Sensor: No motion detected!');
+                this.logger.debug(`Motion Detection Sensor: (${register[MOTION_DETECT]}) No motion detected!`);
             }
         }
     }

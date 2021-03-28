@@ -3,3 +3,4 @@ src/
 dist/*.map
 RaspiJar.png
 tsconfig.json
+*.tsbuildinfo
