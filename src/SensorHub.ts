@@ -4,7 +4,7 @@ import { init } from 'raspi';
 import { I2C } from 'raspi-i2c';
 import { Logging } from 'homebridge';
 import { SensorHubPlatform } from './SensorHubPlatform';
-import { SensorHubData } from './SensorHubData';
+
 
 
 // SensorHub address
@@ -40,8 +40,18 @@ const T_FAIL = 0x02; // external temperture sensor not found
 const L_OVR = 0x03; // Brightness sensor overrange
 const L_FAIL = 0x04; // Brightness sensor failure
 
-const BUFFER_SIZE = 5;
+const SENSOR_READS = 5;
 
+
+type SensorHubData = {
+    externalTemperature: number;
+    brightness: number;
+    onBoardTemperatur: number;
+    humidity: number;
+    motionDetected: boolean;
+    bmp280Temperature: number;
+    bmp280Pressure: number;
+};
 
 export class SensorHub {
     private logger: Logging;
@@ -57,8 +67,6 @@ export class SensorHub {
         bmp280Pressure: 0,
     };
 
-    private sensorDataBuffer: Array<SensorHubData> = new Array<SensorHubData>();
-    private sensorDataBufferIndex = 0n;
 
     public constructor(public readonly platform: SensorHubPlatform) {
         this.logger = this.platform.logger;
@@ -108,13 +116,18 @@ export class SensorHub {
     private readSensors() {
         // see https://wiki.52pi.com/index.php/DockerPi_Sensor_Hub_Development_Board_SKU:_EP-0106#DockerPi_Sensor_Hub_Development_Board_V2.0
 
-        init(() => this.readRegisters());
+        init(() => this.readSensorData());
     }
 
 
-    private readRegisters() {
-        const register: Array<number> = [];
+    private readSensorData() {
         const i2c = new I2C();
+        this.readRegister(i2c);
+    }
+
+    private readRegister(i2c: I2C) {
+        const register: Array<number> = new Array<number>(MOTION_DETECT);
+
 
         // read all registers
         for (let i = TEMP_REG; i <= MOTION_DETECT; i++) {
@@ -122,12 +135,12 @@ export class SensorHub {
             register[i] = data;
         }
 
+
         this.readOnBoardSensors(register);
         this.readLigthBrightnessSensor(register);
         this.readMotionSensor(register);
         this.readBmp280Sensor(register);
         this.readExternalTemperatureSensor(register);
-
     }
 
 
@@ -215,7 +228,6 @@ export class SensorHub {
                 this.logger.debug(`BMP280 Temperature Sensor: ${currentTemperature} C`);
                 this.platform.onBoardAccessory.bmp280TemperatureChanged(currentTemperature);
             }
-
 
             // Read Pressure
             const oldPressure = this.bmp280Pressure;
